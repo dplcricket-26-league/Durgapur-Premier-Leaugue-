@@ -213,20 +213,20 @@ export const ReferenceAuctionStage: React.FC<ReferenceAuctionStageProps> = ({
   const isUnsold = player?.status === 'unsold' || auctionState.status === 'unsold';
 
   return (
-    <div id="live-stage-arena" className="max-w-6xl mx-auto px-4 mt-8 pb-12 font-inter">
+    <div id="live-stage-arena" className="max-w-6xl mx-auto px-3 sm:px-4 mt-6 sm:mt-8 pb-12 font-inter">
       {/* Top Banner matching reference Image 2: THE MAIN AUCTION STAGE */}
-      <div className="bg-white border border-[#E2E8F0] p-4 flex flex-wrap items-center justify-between gap-3 shadow-2xs mb-6">
+      <div className="bg-white border border-[#E2E8F0] p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-2xs mb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black font-playfair tracking-wide text-[#111827]">
+          <h2 className="text-lg sm:text-2xl font-black font-playfair tracking-wide text-[#111827]">
             THE MAIN AUCTION STAGE
           </h2>
-          <p className="text-[11px] text-[#64748B] font-inter">
-            6 Lots Remaining In Registry • 0 Pending Recall
+          <p className="text-[10px] sm:text-[11px] text-[#64748B] font-inter">
+            {teams.length} Franchises In Arena • Real-time Hammer Deck
           </p>
         </div>
 
         {/* Action Controls in Header Bar matching reference */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
           {/* COMMENCE AUCTION */}
           <button
             onClick={() => {
@@ -235,16 +235,16 @@ export const ReferenceAuctionStage: React.FC<ReferenceAuctionStageProps> = ({
                 playGavelSound();
               }
             }}
-            className="px-4 py-2 bg-[#D4AF37] hover:bg-[#C69214] text-[#1E293B] text-xs font-bold uppercase tracking-wider font-inter flex items-center space-x-1.5 transition-all shadow-xs"
+            className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 bg-[#D4AF37] hover:bg-[#C69214] text-[#1E293B] text-[11px] sm:text-xs font-bold uppercase tracking-wider font-inter flex items-center justify-center space-x-1.5 transition-all shadow-xs"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
-            <span>COMMENCE AUCTION</span>
+            <span>COMMENCE</span>
           </button>
 
           {/* NEXT LOT */}
           <button
             onClick={onNextLot}
-            className="px-3.5 py-2 bg-white hover:bg-slate-50 text-[#1E293B] border border-[#CBD5E1] text-xs font-bold uppercase tracking-wider font-inter flex items-center space-x-1 transition-all"
+            className="px-3 sm:px-3.5 py-2 bg-white hover:bg-slate-50 text-[#1E293B] border border-[#CBD5E1] text-[11px] sm:text-xs font-bold uppercase tracking-wider font-inter flex items-center space-x-1 transition-all"
           >
             <ChevronRight className="w-4 h-4" />
             <span>NEXT LOT</span>
@@ -254,18 +254,18 @@ export const ReferenceAuctionStage: React.FC<ReferenceAuctionStageProps> = ({
           <button
             onClick={handleHammerBidSold}
             disabled={!highestBidTeam}
-            className="px-4 py-2 bg-[#E2E8F0] hover:bg-[#CBD5E1] text-[#64748B] hover:text-[#1E293B] text-xs font-bold uppercase tracking-wider font-inter flex items-center space-x-1.5 transition-all disabled:opacity-50"
+            className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 bg-[#E2E8F0] hover:bg-[#CBD5E1] text-[#64748B] hover:text-[#1E293B] text-[11px] sm:text-xs font-bold uppercase tracking-wider font-inter flex items-center justify-center space-x-1.5 transition-all disabled:opacity-50"
           >
             <ReferenceHammerIcon size={16} />
-            <span>HAMMER BID (SOLD)</span>
+            <span>HAMMER (SOLD)</span>
           </button>
 
           {/* MARK UNSOLD */}
           <button
             onClick={handlePassUnsold}
-            className="px-3.5 py-2 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold uppercase tracking-wider font-inter flex items-center space-x-1 transition-all"
+            className="px-3 sm:px-3.5 py-2 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-[11px] sm:text-xs font-bold uppercase tracking-wider font-inter flex items-center space-x-1 transition-all"
           >
-            <span>⊘ MARK UNSOLD</span>
+            <span>⊘ UNSOLD</span>
           </button>
 
           {/* REFRESH / RESET */}
@@ -376,30 +376,30 @@ export const ReferenceAuctionStage: React.FC<ReferenceAuctionStageProps> = ({
           </div>
 
           {/* 3 Price Metrics matching reference Image 2: CURRENT BID, RESERVE PRICE, TOP OFFER */}
-          <div className="grid grid-cols-3 gap-2 mt-5 pt-4 border-t border-white/10 text-center font-inter">
-            <div className="border-r border-white/10 pr-2">
-              <span className="text-[10px] uppercase tracking-wider text-slate-300 block">CURRENT BID</span>
-              <span className="text-2xl sm:text-3xl font-black text-[#F59E0B] font-inter block mt-0.5">
+          <div className="grid grid-cols-3 gap-1 sm:gap-2 mt-5 pt-4 border-t border-white/10 text-center font-inter">
+            <div className="border-r border-white/10 pr-1 sm:pr-2">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-300 block truncate">CURRENT BID</span>
+              <span className="text-base sm:text-2xl lg:text-3xl font-black text-[#F59E0B] font-inter block mt-0.5 truncate">
                 ₹{currentBid.toLocaleString('en-IN')}
               </span>
-              <span className="text-[9px] uppercase tracking-wider text-[#F59E0B] font-bold">OPENING RESERVE</span>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-[#F59E0B] font-bold block truncate">OPENING RESERVE</span>
             </div>
 
-            <div className="border-r border-white/10 px-2">
-              <span className="text-[10px] uppercase tracking-wider text-slate-300 block">RESERVE PRICE</span>
-              <span className="text-2xl sm:text-3xl font-black text-white font-inter block mt-0.5">
+            <div className="border-r border-white/10 px-1 sm:px-2">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-300 block truncate">RESERVE PRICE</span>
+              <span className="text-base sm:text-2xl lg:text-3xl font-black text-white font-inter block mt-0.5 truncate">
                 ₹{reservePrice.toLocaleString('en-IN')}
               </span>
-              <span className="text-[9px] uppercase tracking-wider text-slate-400">Base Valuation Entry</span>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-slate-400 block truncate">Base Valuation</span>
             </div>
 
-            <div className="pl-2">
-              <span className="text-[10px] uppercase tracking-wider text-slate-300 block">TOP OFFER</span>
-              <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-inter block mt-0.5">
+            <div className="pl-1 sm:pl-2">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-300 block truncate">TOP OFFER</span>
+              <span className="text-base sm:text-2xl lg:text-3xl font-black text-emerald-400 font-inter block mt-0.5 truncate">
                 ₹{currentBid.toLocaleString('en-IN')}
               </span>
-              <span className="text-[9px] uppercase tracking-wider text-emerald-300">
-                {highestBidTeam ? highestBidTeam.name : 'Awaiting First Offer'}
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-emerald-300 block truncate">
+                {highestBidTeam ? highestBidTeam.shortName : 'Awaiting'}
               </span>
             </div>
           </div>
@@ -474,11 +474,11 @@ export const ReferenceAuctionStage: React.FC<ReferenceAuctionStageProps> = ({
                   placeholder="Enter Owner Hidden Code..."
                   value={enteredPasscode}
                   onChange={(e) => setEnteredPasscode(e.target.value)}
-                  className="flex-1 bg-[#121626] border border-slate-700 px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#C69214]"
+                  className="flex-1 min-w-0 bg-[#121626] border border-slate-700 px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#C69214]"
                 />
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 bg-[#854D0E] hover:bg-[#A16207] text-[#FEF08A] font-bold text-xs uppercase tracking-wider transition-colors"
+                  className="px-3.5 py-1.5 bg-[#854D0E] hover:bg-[#A16207] text-[#FEF08A] font-bold text-xs uppercase tracking-wider transition-colors whitespace-nowrap"
                 >
                   LOCK TEAM
                 </button>

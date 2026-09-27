@@ -10,7 +10,8 @@ import {
   deleteTeamDoc, 
   resetAllPurses, 
   savePlayer, 
-  deletePlayerDoc 
+  deletePlayerDoc,
+  clearAllPlayers
 } from '../services/auctionService';
 import { TEAM_SECRET_CODES } from '../data/initialData';
 
@@ -156,7 +157,7 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
       soldToTeamId: editingPlayer.soldToTeamId ?? '',
       soldToTeamName: editingPlayer.soldToTeamName ?? '',
       status: editingPlayer.status || 'upcoming',
-      photoUrl: editingPlayer.photoUrl || samplePlayerPhotos[0],
+      photoUrl: editingPlayer.photoUrl || '',
       jerseyNumber: editingPlayer.jerseyNumber ? Number(editingPlayer.jerseyNumber) : undefined,
       age: editingPlayer.age ? Number(editingPlayer.age) : 24,
       lotNumber: editingPlayer.lotNumber ? Number(editingPlayer.lotNumber) : (players.length + 1),
@@ -200,41 +201,39 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
     }
   };
 
-  const samplePlayerPhotos = [
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=500&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=500&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=80',
-  ];
+  const handleClearAllPlayers = async () => {
+    if (window.confirm('Are you sure you want to permanently delete ALL players from the database? This removes any test or mock entries so you start completely clean.')) {
+      await clearAllPlayers();
+      showNotification('All players cleared! Registry is now completely clean and empty.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#1E293B] pb-16 font-inter">
       {/* Top Standalone Backend Navigation Bar */}
-      <div className="bg-[#181E32] text-white px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b-2 border-[#D4AF37] sticky top-0 z-40 shadow-lg">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 bg-[#D4AF37] rounded-lg flex items-center justify-center text-[#181E32]">
-            <Shield className="w-6 h-6 fill-current" />
+      <div className="bg-[#181E32] text-white px-3 sm:px-6 py-3 sm:py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b-2 border-[#D4AF37] sticky top-0 z-40 shadow-lg">
+        <div className="flex items-center space-x-2.5 sm:space-x-3.5 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#D4AF37] rounded-lg flex items-center justify-center text-[#181E32] flex-shrink-0">
+            <Shield className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
           </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 SEPARATE BACKEND PORTAL
               </span>
-              <span className="text-xs text-amber-300 font-semibold">
+              <span className="text-[11px] sm:text-xs text-amber-300 font-semibold truncate">
                 {authRole?.role === 'team' 
                   ? `Franchise: ${teams.find(t => t.shortName === authRole.teamShort)?.name || authRole.teamShort} (Passcode Verified)`
                   : 'Committee Master Administrator'}
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black font-playfair tracking-wide text-white uppercase mt-0.5">
+            <h1 className="text-base sm:text-xl md:text-2xl font-black font-playfair tracking-wide text-white uppercase mt-0.5 truncate">
               DURGAPUR PREMIER LEAGUE 2026 • BACKEND CONTROL PANEL
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleResetPurses}
             className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/20 text-blue-100 rounded-md transition-all shadow-xs"
@@ -245,14 +244,14 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
           </button>
           <button
             onClick={onReturnToMain || onLogout}
-            className="flex items-center space-x-1.5 px-4 py-2 text-xs font-bold uppercase tracking-wider bg-[#D4AF37] hover:bg-[#C69214] text-[#181E32] rounded-md transition-all shadow-md"
+            className="flex items-center space-x-1.5 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-[#D4AF37] hover:bg-[#C69214] text-[#181E32] rounded-md transition-all shadow-md"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Live Auction Website</span>
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Live Auction Site</span>
           </button>
           <button
             onClick={onLogout}
-            className="flex items-center space-x-1 px-3 py-2 text-xs font-bold uppercase tracking-wider bg-rose-600/80 hover:bg-rose-700 text-white rounded-md transition-all"
+            className="flex items-center space-x-1 px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-rose-600/80 hover:bg-rose-700 text-white rounded-md transition-all"
             title="Log Out of Backend"
           >
             <span>Exit</span>
@@ -262,15 +261,15 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
 
       {/* Real-time Notice banner */}
       {notice && (
-        <div className="bg-emerald-50 border-b border-emerald-200 px-6 py-3 flex items-center space-x-2 text-emerald-800 text-sm font-semibold animate-in fade-in">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+        <div className="bg-emerald-50 border-b border-emerald-200 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center space-x-2 text-emerald-800 text-xs sm:text-sm font-semibold animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0" />
           <span>{notice}</span>
         </div>
       )}
 
       {/* Navigation Tabs */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
-        <div className="flex border-b border-slate-300 bg-white p-2 rounded-t-xl gap-2 shadow-2xs">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6">
+        <div className="flex border-b border-slate-300 bg-white p-2 rounded-t-xl gap-2 shadow-2xs overflow-x-auto whitespace-nowrap">
           <button
             onClick={() => setActiveTab('players')}
             className={`flex items-center space-x-2 px-6 py-2.5 font-bold text-xs uppercase tracking-wider rounded-lg transition-all ${
@@ -321,39 +320,50 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
                     Images are scaled and fitted into the <b>1.2 × 1.6 box ratio</b> to guarantee full display without distortion.
                   </p>
                 </div>
-                <button
-                  onClick={() => {
-                    setEditingPlayer({
-                      name: '',
-                      nickname: '',
-                      category: 'Batsman',
-                      battingStyle: 'Right Hand Bat',
-                      bowlingStyle: 'Right-arm Fast',
-                      basePrice: 2000,
-                      currentBid: 2000,
-                      soldPrice: 0,
-                      soldToTeamId: '',
-                      soldToTeamName: '',
-                      status: 'upcoming',
-                      photoUrl: samplePlayerPhotos[0],
-                      age: 24,
-                      lotNumber: players.length + 1,
-                      stats: {
-                        matches: 0,
-                        runs: 0,
-                        wickets: 0,
-                        highestScore: '0',
-                        strikeRate: 0,
-                        catches: 0
-                      }
-                    });
-                    setPlayerFormOpen(true);
-                  }}
-                  className="flex items-center space-x-2 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C69214] text-[#181E32] text-xs font-bold uppercase tracking-wider font-inter shadow-sm flex-shrink-0"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Upload New Cricketer</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={handleClearAllPlayers}
+                    className="flex items-center space-x-1.5 px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider font-inter shadow-xs"
+                    title="Purge all player records from database"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Clear All Players</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setEditingPlayer({
+                        name: '',
+                        nickname: '',
+                        category: 'Batsman',
+                        battingStyle: 'Right Hand Bat',
+                        bowlingStyle: 'Right-arm Fast',
+                        basePrice: 2000,
+                        currentBid: 2000,
+                        soldPrice: 0,
+                        soldToTeamId: '',
+                        soldToTeamName: '',
+                        status: 'upcoming',
+                        photoUrl: '',
+                        age: 24,
+                        lotNumber: players.length + 1,
+                        stats: {
+                          matches: 0,
+                          runs: 0,
+                          wickets: 0,
+                          highestScore: '0',
+                          strikeRate: 0,
+                          catches: 0
+                        }
+                      });
+                      setPlayerFormOpen(true);
+                    }}
+                    className="flex items-center space-x-2 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C69214] text-[#181E32] text-xs font-bold uppercase tracking-wider font-inter shadow-sm flex-shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Upload New Cricketer</span>
+                  </button>
+                </div>
               </div>
 
               {/* Player Upload Form Drawer */}
@@ -538,19 +548,6 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
                             />
                           </div>
                         )}
-
-                        <div className="flex items-center gap-2 overflow-x-auto pt-1">
-                          <span className="text-[11px] text-slate-500 font-semibold flex-shrink-0">Presets:</span>
-                          {samplePlayerPhotos.map((url, i) => (
-                            <img
-                              key={i}
-                              src={url}
-                              alt="sample"
-                              onClick={() => setEditingPlayer({ ...editingPlayer, photoUrl: url })}
-                              className="w-7 h-9 object-cover cursor-pointer border border-[#D4AF37] hover:scale-105 transition-transform"
-                            />
-                          ))}
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -709,11 +706,15 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
                         <div className="flex items-start space-x-3.5 mb-3">
                           {/* 1.2 x 1.6 box ratio for player photo */}
                           <div className="w-20 aspect-[1.2/1.6] border border-[#D4AF37] bg-[#FAF7F0] flex items-center justify-center overflow-hidden flex-shrink-0 p-0.5">
-                            <img
-                              src={p.photoUrl || samplePlayerPhotos[0]}
-                              alt={p.name}
-                              className="w-full h-full object-contain"
-                            />
+                            {p.photoUrl ? (
+                              <img
+                                src={p.photoUrl}
+                                alt={p.name}
+                                className="w-full h-full object-contain"
+                              />
+                            ) : (
+                              <Users className="w-6 h-6 text-slate-300" />
+                            )}
                           </div>
 
                           <div className="flex-1 min-w-0">

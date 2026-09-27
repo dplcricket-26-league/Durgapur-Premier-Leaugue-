@@ -58,22 +58,22 @@ export const MasterOwnerBoard: React.FC<MasterOwnerBoardProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#070D1E] text-white font-inter">
       {/* Top Header matching reference Image 2 */}
-      <div className="bg-[#0B132B] border-b border-[#1E293B] px-6 py-4 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-50">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
-            <Shield className="w-5 h-5" />
+      <div className="bg-[#0B132B] border-b border-[#1E293B] px-3.5 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-50">
+        <div className="flex items-center space-x-2.5 sm:space-x-3.5 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 flex-shrink-0">
+            <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <div className="flex items-center space-x-2.5">
-              <h1 className="text-lg sm:text-xl font-black font-playfair tracking-wide text-white uppercase">
-                MASTER OWNER BOARD & DATABASE COMMAND CENTER
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
+              <h1 className="text-xs sm:text-lg font-black font-playfair tracking-wide text-white uppercase truncate">
+                MASTER COMMAND CENTER
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center space-x-1">
+              <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center space-x-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>LIVE BACKEND CONNECTED</span>
+                <span>CONNECTED</span>
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-inter">
+            <p className="text-[10px] sm:text-[11px] text-slate-400 font-inter hidden sm:block">
               Full master control over Player Images & Details, Team Logos & Brands, Refund & Re-Auction, and Database Backups
             </p>
           </div>
@@ -81,7 +81,7 @@ export const MasterOwnerBoard: React.FC<MasterOwnerBoardProps> = ({
 
         <button
           onClick={onClose}
-          className="px-4 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg text-xs font-bold uppercase tracking-wider border border-slate-700 transition-colors"
+          className="px-3 sm:px-4 py-1.5 sm:py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-slate-700 transition-colors ml-auto"
         >
           Exit Board
         </button>
@@ -90,8 +90,8 @@ export const MasterOwnerBoard: React.FC<MasterOwnerBoardProps> = ({
       {/* Main Content Area */}
       {!isAuthenticated ? (
         /* Image 2 Authentication Screen */
-        <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-[#0D1832] border border-[#1E2F54] rounded-2xl p-8 shadow-2xl space-y-6 text-center">
+        <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-3 sm:p-4">
+          <div className="w-full max-w-md bg-[#0D1832] border border-[#1E2F54] rounded-2xl p-5 sm:p-8 shadow-2xl space-y-5 sm:space-y-6 text-center">
             {/* Center Lock Icon */}
             <div className="w-14 h-14 bg-blue-600/20 border border-blue-500/40 rounded-2xl mx-auto flex items-center justify-center text-blue-400">
               <Lock className="w-6 h-6" />

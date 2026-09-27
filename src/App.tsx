@@ -57,7 +57,7 @@ export default function App() {
         });
 
         unsubscribePlayers = subscribeToPlayers((updatedPlayers) => {
-          if (updatedPlayers.length > 0) setPlayers(updatedPlayers);
+          setPlayers(updatedPlayers);
         });
 
         unsubscribeAuction = subscribeToAuctionState((updatedState) => {
@@ -119,7 +119,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] text-[#1E293B] font-inter antialiased">
+    <div className="min-h-screen bg-[#FAF7F0] text-[#1E293B] font-inter antialiased w-full overflow-x-hidden">
       {/* Top Header & Ticker Bar matching reference Images 3, 4, 5, 6 */}
       <ReferenceTopNav
         onEnterStage={() => scrollToSection('live-stage-arena')}
@@ -129,7 +129,7 @@ export default function App() {
         onUnlockTeam={() => setLockedTeamId(null)}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6">
+      <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 overflow-x-hidden">
         {/* First Page Presentation matching reference Image 1: DPL 2026 PLAYER AUCTION */}
         <ReferenceHero
           spotlightPlayer={activePlayer}

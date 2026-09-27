@@ -97,17 +97,17 @@ export const FranchisePaddlesSection: React.FC<FranchisePaddlesSectionProps> = (
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <input
               type="text"
               value={inputCode}
               onChange={(e) => setInputCode(e.target.value)}
               placeholder="Enter Owner Hidden Code..."
-              className="px-3.5 py-2.5 bg-black/40 border border-[#D4AF37]/50 text-white placeholder-slate-400 text-xs font-mono tracking-wider focus:outline-none focus:border-[#D4AF37] min-w-[220px]"
+              className="px-3.5 py-2.5 bg-black/40 border border-[#D4AF37]/50 text-white placeholder-slate-400 text-xs font-mono tracking-wider focus:outline-none focus:border-[#D4AF37] w-full sm:w-60 min-w-0"
             />
             <button
               type="submit"
-              className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C69214] text-[#181E32] font-black uppercase tracking-wider text-xs whitespace-nowrap transition-colors"
+              className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C69214] text-[#181E32] font-black uppercase tracking-wider text-xs whitespace-nowrap transition-colors text-center"
             >
               UNLOCK TEAM & BID
             </button>
@@ -123,22 +123,22 @@ export const FranchisePaddlesSection: React.FC<FranchisePaddlesSectionProps> = (
 
       {/* Verified Unlocked Banner matching Image 3 */}
       {lockedTeam && (
-        <div className="bg-white border-2 border-emerald-500 p-5 flex flex-wrap items-center justify-between gap-4 shadow-sm animate-in fade-in">
-          <div className="flex items-center space-x-4">
+        <div className="bg-white border-2 border-emerald-500 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
+          <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
             <img
               src={lockedTeam.logoUrl}
               alt={lockedTeam.name}
-              className="w-14 h-14 object-cover border border-slate-200 shadow-2xs"
+              className="w-12 h-12 sm:w-14 sm:h-14 object-cover border border-slate-200 shadow-2xs flex-shrink-0"
             />
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 flex items-center space-x-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <div className="min-w-0">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-700 flex items-center space-x-1 truncate">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                 <span>VERIFIED OWNER FRANCHISE UNLOCKED</span>
               </span>
-              <h3 className="text-xl font-black font-playfair text-[#111827]">
+              <h3 className="text-lg sm:text-xl font-black font-playfair text-[#111827] truncate">
                 {lockedTeam.name} ({lockedTeam.shortName})
               </h3>
-              <p className="text-xs text-slate-500 italic">
+              <p className="text-[11px] sm:text-xs text-slate-500 italic truncate">
                 {TEAM_SLOGANS[lockedTeam.shortName] || '"Champions of Durgapur"'} · Purse: ₹{(lockedTeam.remainingPurse || 60000).toLocaleString('en-IN')}
               </p>
             </div>
@@ -146,7 +146,7 @@ export const FranchisePaddlesSection: React.FC<FranchisePaddlesSectionProps> = (
 
           <button
             onClick={onProceedToStage}
-            className="px-6 py-2.5 bg-[#D4AF37] hover:bg-[#C69214] text-[#181E32] font-black uppercase tracking-wider text-xs flex items-center space-x-2 transition-all shadow-sm"
+            className="w-full sm:w-auto px-5 sm:px-6 py-2.5 bg-[#D4AF37] hover:bg-[#C69214] text-[#181E32] font-black uppercase tracking-wider text-xs flex items-center justify-center space-x-2 transition-all shadow-sm"
           >
             <span>PROCEED TO STAGE & BID</span>
             <ArrowRight className="w-4 h-4" />

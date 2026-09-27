@@ -105,8 +105,13 @@ export const ChronicleOfBidsSection: React.FC<ChronicleOfBidsSectionProps> = ({
         </div>
       ) : (
         <div className="border border-[#E2E8F0] bg-white overflow-hidden shadow-2xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs font-inter">
+          <div className="px-3 py-1 bg-slate-50 border-b border-slate-100 sm:hidden">
+            <span className="text-[10px] text-slate-500 italic block">
+              ← Swipe table horizontally to see event dispatches & sale amounts →
+            </span>
+          </div>
+          <div className="overflow-x-auto w-full">
+            <table className="w-full min-w-[500px] text-left text-xs font-inter">
               <thead className="bg-[#181E32] text-white uppercase text-[10px] tracking-wider">
                 <tr>
                   <th className="py-2.5 px-4">Event Time</th>

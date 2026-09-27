@@ -35,28 +35,28 @@ export const PlayerRosterSection: React.FC<PlayerRosterSectionProps> = ({
   return (
     <section className="mt-12 space-y-6">
       {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black font-cinzel uppercase tracking-wide text-[#0F172A] flex items-center space-x-2.5">
-            <Activity className="w-6 h-6 text-[#2563EB]" />
-            <span>DURGAPUR PREMIER LEAGUE PLAYER POOL ({players.length})</span>
+          <h2 className="text-lg sm:text-2xl lg:text-3xl font-black font-cinzel uppercase tracking-wide text-[#0F172A] flex items-center space-x-2">
+            <Activity className="w-5 h-5 text-[#2563EB] flex-shrink-0" />
+            <span className="truncate">DPL PLAYER POOL ({players.length})</span>
           </h2>
-          <p className="text-xs text-[#64748B] font-inter mt-1">
+          <p className="text-[11px] sm:text-xs text-[#64748B] font-inter mt-0.5">
             Browse all auction candidates, photos, career stats, base prices, and live bidding status.
           </p>
         </div>
 
         {/* Filters and search */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           {/* Search Input */}
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-initial min-w-[140px]">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search player, style..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-3.5 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-inter focus:outline-none focus:ring-2 focus:ring-[#2563EB] w-52 shadow-2xs"
+              className="pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-inter focus:outline-none focus:ring-2 focus:ring-[#2563EB] w-full sm:w-52 shadow-2xs"
             />
           </div>
 
@@ -64,7 +64,7 @@ export const PlayerRosterSection: React.FC<PlayerRosterSectionProps> = ({
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3.5 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-700 shadow-2xs font-inter"
+            className="px-2.5 sm:px-3.5 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-700 shadow-2xs font-inter flex-1 sm:flex-initial"
           >
             {categories.map((c) => (
               <option key={c} value={c}>{c}</option>
@@ -75,7 +75,7 @@ export const PlayerRosterSection: React.FC<PlayerRosterSectionProps> = ({
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3.5 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-700 shadow-2xs uppercase font-inter"
+            className="px-2.5 sm:px-3.5 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-700 shadow-2xs uppercase font-inter flex-1 sm:flex-initial"
           >
             {statuses.map((s) => (
               <option key={s} value={s}>{s}</option>
@@ -85,30 +85,52 @@ export const PlayerRosterSection: React.FC<PlayerRosterSectionProps> = ({
       </div>
 
       {/* Players Cards Grid with Image Hover Zoom & Glassmorphic Highlights */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        {filteredPlayers.map((player) => {
-          const isLive = player.id === activePlayerId || player.status === 'live';
-          const isSold = player.status === 'sold';
-          const isUnsold = player.status === 'unsold';
+      {filteredPlayers.length === 0 ? (
+        <div className="border-2 border-dashed border-[#CBD5E1] bg-[#FAF7F0] p-10 sm:p-14 text-center rounded-3xl">
+          <div className="w-14 h-14 bg-white border border-[#D4AF37] rounded-2xl mx-auto flex items-center justify-center text-[#B45309] mb-3 shadow-xs">
+            <Trophy className="w-6 h-6" />
+          </div>
+          <h3 className="font-playfair text-xl font-black text-[#111827]">
+            {players.length === 0 ? 'No Players in Registry Yet' : 'No Matching Players Found'}
+          </h3>
+          <p className="text-xs text-[#64748B] mt-1.5 max-w-md mx-auto font-inter">
+            {players.length === 0 
+              ? 'The official player pool is clean and waiting for submissions. Master Owners can add player names, upload custom 1.2x1.6 photos, and set reserve prices via the Owner Board.'
+              : 'Try changing your search terms or resetting the category and status filters.'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {filteredPlayers.map((player) => {
+            const isLive = player.id === activePlayerId || player.status === 'live';
+            const isSold = player.status === 'sold';
+            const isUnsold = player.status === 'unsold';
 
-          return (
-            <div
-              key={player.id}
-              className={`glass-panel rounded-3xl border p-5 flex flex-col justify-between transition-all duration-300 img-hover-zoom ${
-                isLive
-                  ? 'border-[#2563EB] shadow-xl ring-2 ring-[#2563EB]/25 bg-white'
-                  : isSold
-                  ? 'border-emerald-200 bg-white/70'
-                  : 'border-[#E2E8F0] shadow-sm hover:border-[#93C5FD] hover:shadow-md'
-              }`}
-            >
-              <div>
-                <div className="relative mb-3.5 rounded-xl overflow-hidden border border-slate-200 bg-[#FAF7F0] w-full aspect-[1.2/1.6] flex items-center justify-center shadow-xs p-1">
-                  <img
-                    src={player.photoUrl}
-                    alt={player.name}
-                    className="w-full h-full object-contain"
-                  />
+            return (
+              <div
+                key={player.id}
+                className={`glass-panel rounded-3xl border p-5 flex flex-col justify-between transition-all duration-300 img-hover-zoom ${
+                  isLive
+                    ? 'border-[#2563EB] shadow-xl ring-2 ring-[#2563EB]/25 bg-white'
+                    : isSold
+                    ? 'border-emerald-200 bg-white/70'
+                    : 'border-[#E2E8F0] shadow-sm hover:border-[#93C5FD] hover:shadow-md'
+                }`}
+              >
+                <div>
+                  <div className="relative mb-3.5 rounded-xl overflow-hidden border border-slate-200 bg-[#FAF7F0] w-full aspect-[1.2/1.6] flex items-center justify-center shadow-xs p-1">
+                    {player.photoUrl ? (
+                      <img
+                        src={player.photoUrl}
+                        alt={player.name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-900/5">
+                        <Activity className="w-8 h-8 mb-1" />
+                        <span className="text-[10px] uppercase font-bold text-slate-400">Player Photo</span>
+                      </div>
+                    )}
                   {/* Category Pill */}
                   <span className="absolute top-2.5 left-2.5 bg-[#0F172A]/85 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-0.5 rounded-md uppercase font-cinzel">
                     {player.category}
@@ -207,6 +229,7 @@ export const PlayerRosterSection: React.FC<PlayerRosterSectionProps> = ({
           );
         })}
       </div>
+      )}
 
       {/* Player Detail Modal with Glassmorphism */}
       {modalPlayer && (

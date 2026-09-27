@@ -32,6 +32,49 @@ function sanitizeForFirestore<T extends Record<string, unknown>>(data: T): Recor
   return result;
 }
 
+// Purge any pre-saved mock/sample players from previous runs so only genuine user-added players appear
+export async function purgeMockPlayers(): Promise<void> {
+  try {
+    const playersSnap = await getDocs(collection(db, PLAYERS_COL));
+    const mockKeywords = ['priyam', 'rohit', 'bumrah', 'pandya', 'pant', 'kohli', 'sample', 'mock', 'demo'];
+    for (const playerDoc of playersSnap.docs) {
+      const data = playerDoc.data() as Partial<Player>;
+      const id = playerDoc.id.toLowerCase();
+      const name = (data.name || '').toLowerCase();
+      const isMock = mockKeywords.some(kw => id.includes(kw) || name.includes(kw));
+      if (isMock) {
+        console.log(`Purging mock player: ${playerDoc.id} (${data.name})`);
+        await deleteDoc(doc(db, PLAYERS_COL, playerDoc.id));
+      }
+    }
+  } catch (err) {
+    console.warn('Error purging mock players:', err);
+  }
+}
+
+// Clear all players from the database (for clean slate requested by user)
+export async function clearAllPlayers(): Promise<void> {
+  try {
+    const playersSnap = await getDocs(collection(db, PLAYERS_COL));
+    for (const playerDoc of playersSnap.docs) {
+      await deleteDoc(doc(db, PLAYERS_COL, playerDoc.id));
+    }
+    // Also reset active player in auction state
+    const auctionStateDoc = doc(db, 'system', AUCTION_DOC);
+    await updateDoc(auctionStateDoc, {
+      activePlayerId: null,
+      status: 'idle',
+      currentBid: 2000,
+      currentBidTeamId: null,
+      currentBidTeamName: null,
+      hammerCount: 0,
+      history: []
+    });
+  } catch (err) {
+    console.error('Error clearing all players:', err);
+  }
+}
+
 // Initialize defaults in Firestore if empty
 export async function initializeFirestoreDefaults(): Promise<void> {
   try {
@@ -47,25 +90,16 @@ export async function initializeFirestoreDefaults(): Promise<void> {
       }
     }
 
-    const playersSnap = await getDocs(collection(db, PLAYERS_COL));
-    if (playersSnap.empty) {
-      console.log('Seeding initial DPL players...');
-      for (const player of DEFAULT_PLAYERS) {
-        const sanitizedPlayer = sanitizeForFirestore({
-          ...player,
-          updatedAt: Date.now()
-        });
-        await setDoc(doc(db, PLAYERS_COL, player.id), sanitizedPlayer);
-      }
-    }
+    // Automatically purge any pre-saved mock players so player roster starts clean
+    await purgeMockPlayers();
 
     // Set initial auction state if not present
     const auctionStateDoc = doc(db, 'system', AUCTION_DOC);
     await setDoc(auctionStateDoc, sanitizeForFirestore({
       currentRound: 1,
-      activePlayerId: DEFAULT_PLAYERS[0]?.id || null,
+      activePlayerId: null,
       status: 'idle',
-      currentBid: DEFAULT_PLAYERS[0]?.basePrice || 2000,
+      currentBid: 2000,
       currentBidTeamId: null,
       currentBidTeamName: null,
       lastBidTime: Date.now(),

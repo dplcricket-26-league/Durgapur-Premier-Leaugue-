@@ -35,8 +35,13 @@ export const StandingsSection: React.FC<StandingsSectionProps> = ({
 
       {/* Standings Table matching Image 5 */}
       <div className="border border-[#CBD5E1] bg-white overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs font-inter border-collapse">
+        <div className="px-3 py-1 bg-slate-50 border-b border-slate-100 sm:hidden">
+          <span className="text-[10px] text-slate-500 italic block">
+            ← Swipe table horizontally to see all franchise purse & squad metrics →
+          </span>
+        </div>
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-[580px] text-left text-xs font-inter border-collapse">
             <thead className="bg-[#181E32] text-white uppercase text-[10px] tracking-wider">
               <tr>
                 <th className="py-3 px-5 text-center w-16">RANK</th>

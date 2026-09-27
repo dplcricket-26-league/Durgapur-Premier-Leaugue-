@@ -80,38 +80,38 @@ export const FranchiseLoginModal: React.FC<FranchiseLoginModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200 font-inter">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200 font-inter">
       {/* Exact style matching reference Image 1 */}
       <div 
-        className="w-full max-w-lg bg-[#0F172A] border-2 border-[#D4AF37] rounded-xl shadow-2xl overflow-hidden text-white"
+        className="w-full max-w-lg bg-[#0F172A] border-2 border-[#D4AF37] rounded-xl shadow-2xl overflow-hidden text-white max-h-[94vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header matching Image 1 */}
-        <div className="p-6 pb-4 flex items-start justify-between">
-          <div className="flex items-start space-x-3.5">
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-[#D4AF37] flex-shrink-0 mt-0.5">
-              <Key className="w-5 h-5" />
+        <div className="p-4 sm:p-6 pb-3 sm:pb-4 flex items-start justify-between gap-2">
+          <div className="flex items-start space-x-2.5 sm:space-x-3.5 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-[#D4AF37] flex-shrink-0 mt-0.5">
+              <Key className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black font-playfair tracking-wide uppercase text-white leading-tight">
+            <div className="min-w-0">
+              <h2 className="text-lg sm:text-2xl font-black font-playfair tracking-wide uppercase text-white leading-tight truncate">
                 FRANCHISE TEAM LOGIN
               </h2>
-              <p className="text-xs text-slate-400 mt-1 font-inter">
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-inter">
                 Log in with your secret code for one franchise to lock your team on the Home Page
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors flex-shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Form Container matching Image 1 */}
-        <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4">
-          <div className="p-5 bg-[#182234] border border-[#27354E] rounded-xl space-y-4">
+        <form onSubmit={handleSubmit} className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 sm:space-y-4">
+          <div className="p-3.5 sm:p-5 bg-[#182234] border border-[#27354E] rounded-xl space-y-3 sm:space-y-4">
             {error && (
               <div className="p-3 bg-red-950/60 border border-red-500/50 rounded-lg text-xs text-red-200">
                 {error}
