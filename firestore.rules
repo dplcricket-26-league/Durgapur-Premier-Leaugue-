@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Public read for live auction view by audience and teams
+    // Writes permitted for auction updates and owner panel operations
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
