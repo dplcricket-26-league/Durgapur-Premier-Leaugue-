@@ -2,16 +2,18 @@ import React, { useState } from 'react';
 import { 
   Building2, Users, Plus, Trash2, Edit3, Save, X, RotateCcw, 
   Upload, Shield, IndianRupee, Trophy, Image, Award, CheckCircle2,
-  FileImage, Link, Sparkles, Key, Lock, ArrowLeft
+  FileImage, Link, Sparkles, Key, Lock, ArrowLeft, RefreshCw, AlertTriangle, Play
 } from 'lucide-react';
 import { Team, Player, PlayerCategory } from '../types/auction';
 import { 
   saveTeam, 
   deleteTeamDoc, 
   resetAllPurses, 
+  recalculateAllTeamPurses,
   savePlayer, 
   deletePlayerDoc,
-  clearAllPlayers
+  clearAllPlayers,
+  refundPlayer
 } from '../services/auctionService';
 import { TEAM_SECRET_CODES } from '../data/initialData';
 
@@ -34,7 +36,7 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
   onSelectPlayerForAuction,
   authRole
 }) => {
-  const [activeTab, setActiveTab] = useState<'players' | 'teams' | 'team_codes'>('players');
+  const [activeTab, setActiveTab] = useState<'players' | 'teams' | 'refunds' | 'team_codes'>('players');
 
   // Team Form State
   const [editingTeam, setEditingTeam] = useState<Partial<Team> | null>(null);
@@ -44,6 +46,9 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
   const [editingPlayer, setEditingPlayer] = useState<Partial<Player> | null>(null);
   const [playerFormOpen, setPlayerFormOpen] = useState(false);
   const [imageUploadMode, setImageUploadMode] = useState<'file' | 'url'>('file');
+
+  // Refunding State
+  const [refundingId, setRefundingId] = useState<string | null>(null);
 
   // Success Notification
   const [notice, setNotice] = useState<string | null>(null);
@@ -181,32 +186,74 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
   };
 
   const handleResetPurses = async () => {
-    if (window.confirm('Are you sure you want to reset all team purses back to ₹60,000?')) {
+    try {
       await resetAllPurses();
-      showNotification('All franchise purses have been reset to ₹60,000.');
+      showNotification('All 4 franchise purses have been reset to ₹60,000.');
+    } catch (err) {
+      console.error(err);
+      showNotification('Failed to reset team purses.');
+    }
+  };
+
+  const handleRecalculatePurses = async () => {
+    try {
+      await recalculateAllTeamPurses();
+      showNotification('✓ All franchise purses verified & synchronized with active sold rosters.');
+    } catch (err) {
+      console.error(err);
+      showNotification('Failed to recalculate purses.');
     }
   };
 
   const handleDeleteTeam = async (id: string, name: string) => {
-    if (window.confirm(`Delete ${name}?`)) {
+    try {
       await deleteTeamDoc(id);
       showNotification(`Deleted team ${name}`);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const handleDeletePlayer = async (id: string, name: string) => {
-    if (window.confirm(`Delete player ${name}?`)) {
+    try {
       await deletePlayerDoc(id);
       showNotification(`Deleted player ${name}`);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const handleClearAllPlayers = async () => {
-    if (window.confirm('Are you sure you want to permanently delete ALL players from the database? This removes any test or mock entries so you start completely clean.')) {
+    try {
       await clearAllPlayers();
       showNotification('All players cleared! Registry is now completely clean and empty.');
+    } catch (err) {
+      console.error(err);
     }
   };
+
+  // Dedicated Player Refund Handler
+  // Restores franchise purse and returns player to available pool or live stage
+  const handleRefundPlayer = async (player: Player, reAuction: boolean = false) => {
+    setRefundingId(player.id);
+    try {
+      const res = await refundPlayer(player, teams, reAuction);
+      showNotification(
+        `✓ REFUND PROCESSED: ₹${res.refundedAmount.toLocaleString('en-IN')} credited back to ${res.teamName}! Remaining purse is now ₹${res.remainingPurse.toLocaleString('en-IN')}.`
+      );
+      if (reAuction) {
+        onSelectPlayerForAuction(player);
+      }
+    } catch (err) {
+      console.error('Error refunding player:', err);
+      showNotification('Failed to process player refund. Check network connection.');
+    } finally {
+      setRefundingId(null);
+    }
+  };
+
+  const soldPlayers = players.filter(p => p.status === 'sold');
+  const totalSoldPurse = soldPlayers.reduce((sum, p) => sum + (p.soldPrice || p.currentBid || 0), 0);
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#1E293B] pb-16 font-inter">
@@ -272,7 +319,7 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
         <div className="flex border-b border-slate-300 bg-white p-2 rounded-t-xl gap-2 shadow-2xs overflow-x-auto whitespace-nowrap">
           <button
             onClick={() => setActiveTab('players')}
-            className={`flex items-center space-x-2 px-6 py-2.5 font-bold text-xs uppercase tracking-wider rounded-lg transition-all ${
+            className={`flex items-center space-x-2 px-5 py-2.5 font-bold text-xs uppercase tracking-wider rounded-lg transition-all ${
               activeTab === 'players'
                 ? 'bg-[#181E32] text-white shadow-sm'
                 : 'text-slate-600 hover:text-[#181E32] hover:bg-slate-100'
@@ -284,7 +331,7 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
 
           <button
             onClick={() => setActiveTab('teams')}
-            className={`flex items-center space-x-2 px-6 py-2.5 font-bold text-xs uppercase tracking-wider rounded-lg transition-all ${
+            className={`flex items-center space-x-2 px-5 py-2.5 font-bold text-xs uppercase tracking-wider rounded-lg transition-all ${
               activeTab === 'teams'
                 ? 'bg-[#181E32] text-white shadow-sm'
                 : 'text-slate-600 hover:text-[#181E32] hover:bg-slate-100'
@@ -294,9 +341,30 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
             <span>4 Franchise Teams & Purses ({teams.length})</span>
           </button>
 
+          {/* Dedicated Private Refund & Re-Auction Desk Tab */}
+          <button
+            onClick={() => setActiveTab('refunds')}
+            className={`flex items-center space-x-2 px-5 py-2.5 font-bold text-xs uppercase tracking-wider rounded-lg transition-all ${
+              activeTab === 'refunds'
+                ? 'bg-[#B45309] text-white shadow-sm ring-2 ring-amber-300'
+                : 'text-slate-700 hover:text-[#B45309] hover:bg-amber-50'
+            }`}
+            title="Private Owner Desk: Refund player contracts and restore franchise purses"
+          >
+            <RotateCcw className="w-4 h-4 text-amber-400" />
+            <span>Player Refund & Re-Auction Desk</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+              soldPlayers.length > 0 
+                ? 'bg-amber-400 text-slate-900' 
+                : 'bg-slate-200 text-slate-600'
+            }`}>
+              {soldPlayers.length}
+            </span>
+          </button>
+
           <button
             onClick={() => setActiveTab('team_codes')}
-            className={`flex items-center space-x-2 px-6 py-2.5 font-bold text-xs uppercase tracking-wider rounded-lg transition-all ${
+            className={`flex items-center space-x-2 px-5 py-2.5 font-bold text-xs uppercase tracking-wider rounded-lg transition-all ${
               activeTab === 'team_codes'
                 ? 'bg-[#181E32] text-white shadow-sm'
                 : 'text-slate-600 hover:text-[#181E32] hover:bg-slate-100'
@@ -744,9 +812,21 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
                         </div>
 
                         {p.status === 'sold' && (
-                          <div className="bg-emerald-50 border border-emerald-200 p-2 text-xs mb-3 text-emerald-900 flex justify-between items-center">
-                            <span>Sold to: <b>{p.soldToTeamName}</b></span>
-                            <span className="font-extrabold text-emerald-700">₹{(p.soldPrice || 0).toLocaleString('en-IN')}</span>
+                          <div className="bg-amber-50 border border-amber-300 p-2.5 text-xs mb-3 text-amber-950 rounded space-y-1.5 shadow-2xs">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[11px] text-slate-600">Sold to: <b className="text-slate-900 font-bold">{p.soldToTeamName}</b></span>
+                              <span className="font-extrabold text-amber-800 text-xs">₹{(p.soldPrice || p.currentBid || 0).toLocaleString('en-IN')}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRefundPlayer(p, false)}
+                              disabled={refundingId === p.id}
+                              className="w-full py-1.5 px-2 bg-[#B45309] hover:bg-[#92400E] text-white font-bold text-[10px] uppercase tracking-wider flex items-center justify-center space-x-1.5 rounded transition-all disabled:opacity-50 shadow-xs"
+                              title="Refund player purchase and restore purse to franchise"
+                            >
+                              <RotateCcw className="w-3 h-3 text-amber-200" />
+                              <span>{refundingId === p.id ? 'Processing Refund...' : `Refund Player (+₹${(p.soldPrice || p.currentBid || 0).toLocaleString('en-IN')} To Purse)`}</span>
+                            </button>
                           </div>
                         )}
                       </div>
@@ -976,13 +1056,238 @@ export const OwnerPanel: React.FC<OwnerPanelProps> = ({
                         <span className="font-bold">{t.playersCount || 0}</span>
                       </div>
                     </div>
+
+                    {/* Signed Players & Purse Refund Option */}
+                    {(() => {
+                      const signedRoster = players.filter(p => p.soldToTeamId === t.id);
+                      if (signedRoster.length === 0) return null;
+                      return (
+                        <div className="mt-3 pt-2.5 border-t border-slate-200">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                            Signed Players ({signedRoster.length}):
+                          </span>
+                          <div className="space-y-1 max-h-36 overflow-y-auto">
+                            {signedRoster.map(sp => (
+                              <div key={sp.id} className="flex items-center justify-between p-1.5 bg-amber-50/60 border border-amber-200 rounded text-[11px]">
+                                <div className="truncate mr-1">
+                                  <span className="font-bold text-slate-900">{sp.name}</span>
+                                  <span className="text-amber-800 ml-1 font-semibold">₹{(sp.soldPrice || sp.currentBid || 0).toLocaleString('en-IN')}</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRefundPlayer(sp, false)}
+                                  disabled={refundingId === sp.id}
+                                  className="px-2 py-0.5 bg-[#B45309] hover:bg-[#92400E] text-white text-[10px] font-bold uppercase rounded flex items-center space-x-1 flex-shrink-0 disabled:opacity-50"
+                                  title="Refund player contract to restore purse"
+                                >
+                                  <RotateCcw className="w-2.5 h-2.5" />
+                                  <span>Refund</span>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* TAB 3: 4 TEAM NAMES & HIDDEN CODES */}
+          {/* TAB 3: DEDICATED PLAYER REFUND & RE-AUCTION DESK */}
+          {/* CONTROL ONLY FROM OWNER PANEL - NOT PUBLIC USE */}
+          {activeTab === 'refunds' && (
+            <div className="space-y-6">
+              {/* Header Banner */}
+              <div className="bg-[#FAF7F0] border-2 border-[#B45309] p-5 sm:p-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start space-x-3.5">
+                    <div className="w-12 h-12 rounded-lg bg-[#B45309] text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
+                      <RotateCcw className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-amber-200 text-amber-900 rounded font-mono">
+                          EXCLUSIVE OWNER CONTROL • PRIVATE BACKEND ONLY
+                        </span>
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-black font-playfair text-[#111827] mt-1">
+                        Player Contract Refunds & Purse Restoration Desk
+                      </h3>
+                      <p className="text-xs text-[#64748B] mt-0.5 max-w-2xl leading-relaxed">
+                        When a player is refunded here, the full bid sum is <b>credited back directly to the franchise purse</b>, their roster count is restored, and the cricketer is released for re-auction. Public users cannot access or view this refund console.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleRecalculatePurses}
+                      className="px-3 py-2 bg-white hover:bg-slate-50 border border-amber-300 text-amber-900 font-bold text-xs uppercase tracking-wider rounded flex items-center space-x-1.5 shadow-2xs transition-all"
+                      title="Recalculate all 4 franchise balances from the database roster"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-amber-700" />
+                      <span>Sync Purses</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResetPurses}
+                      className="px-3 py-2 bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs uppercase tracking-wider rounded flex items-center space-x-1.5 shadow-2xs transition-all"
+                      title="Reset all 4 team purses to ₹60,000"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-amber-300" />
+                      <span>Reset Purses to ₹60,000</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Key Metrics */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-5 pt-4 border-t border-amber-200">
+                  <div className="bg-white p-3.5 border border-amber-300 rounded shadow-2xs">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block">TOTAL CONTRACTS SOLD</span>
+                    <span className="text-2xl font-black font-playfair text-[#111827]">{soldPlayers.length}</span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">Available for purse refund</span>
+                  </div>
+
+                  <div className="bg-white p-3.5 border border-amber-300 rounded shadow-2xs">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block">DISBURSED TREASURY FUNDS</span>
+                    <span className="text-2xl font-black font-playfair text-[#B45309]">₹{totalSoldPurse.toLocaleString('en-IN')}</span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">Across all 4 official franchises</span>
+                  </div>
+
+                  <div className="bg-white p-3.5 border border-amber-300 rounded shadow-2xs">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block">AUTOMATIC PURSE REVERSAL</span>
+                    <span className="text-2xl font-black font-playfair text-emerald-700">100% REAL-TIME</span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">Synced with Google Cloud Firestore</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sold Players Roster for Refund */}
+              {soldPlayers.length === 0 ? (
+                <div className="border-2 border-dashed border-[#CBD5E1] bg-[#FAF7F0] p-10 sm:p-14 text-center rounded-2xl">
+                  <div className="w-14 h-14 bg-white border border-[#D4AF37] rounded-xl mx-auto flex items-center justify-center text-[#B45309] mb-3 shadow-xs">
+                    <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+                  </div>
+                  <h4 className="text-lg font-bold font-playfair text-[#111827]">
+                    No Player Contracts Currently Sold
+                  </h4>
+                  <p className="text-xs text-[#64748B] max-w-md mx-auto mt-1 leading-relaxed">
+                    Once a player is hammered down and sold to a franchise on the Live Auction Stage, their contract record will appear here with 1-click purse refund and re-auction options.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                    <h4 className="text-sm font-bold font-playfair text-[#111827] uppercase tracking-wide">
+                      Active Signed Contracts ({soldPlayers.length})
+                    </h4>
+                    <span className="text-xs text-slate-500 italic">
+                      Click "Refund to Purse" to credit the franchise
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {soldPlayers.map(p => {
+                      const buyerTeam = teams.find(t => t.id === p.soldToTeamId) || 
+                        teams.find(t => t.name.toLowerCase() === p.soldToTeamName?.toLowerCase());
+                      const refundVal = p.soldPrice || p.currentBid || p.basePrice || 0;
+
+                      return (
+                        <div 
+                          key={p.id}
+                          className="bg-white border-2 border-amber-200 hover:border-amber-400 p-4 rounded-xl shadow-xs transition-all flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-start space-x-3.5">
+                              {/* 1.2 x 1.6 Ratio Player Photo */}
+                              <div className="w-20 aspect-[1.2/1.6] border-2 border-[#D4AF37] bg-[#FAF7F0] flex items-center justify-center overflow-hidden flex-shrink-0 p-0.5 rounded shadow-2xs">
+                                {p.photoUrl ? (
+                                  <img 
+                                    src={p.photoUrl} 
+                                    alt={p.name}
+                                    className="w-full h-full object-contain"
+                                  />
+                                ) : (
+                                  <Users className="w-7 h-7 text-slate-300" />
+                                )}
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-[#FAF7F0] border border-[#D4AF37] text-[#181E32] uppercase">
+                                    Lot #{p.lotNumber || '01'}
+                                  </span>
+                                  <span className="text-[10px] font-black px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded uppercase">
+                                    SOLD CONTRACT
+                                  </span>
+                                </div>
+
+                                <h4 className="text-base font-bold font-playfair text-[#111827] mt-1 truncate">
+                                  {p.name}
+                                </h4>
+                                <p className="text-xs text-[#C69214] font-semibold">{p.category} • {p.battingStyle}</p>
+
+                                {/* Franchise Buyer Banner */}
+                                <div className="mt-2.5 p-2 bg-slate-50 border border-slate-200 rounded flex items-center justify-between">
+                                  <div className="flex items-center space-x-2 min-w-0">
+                                    {buyerTeam?.logoUrl && (
+                                      <img 
+                                        src={buyerTeam.logoUrl} 
+                                        alt={buyerTeam.name} 
+                                        className="w-5 h-5 object-cover border border-slate-200 flex-shrink-0"
+                                      />
+                                    )}
+                                    <span className="text-xs font-bold text-slate-800 truncate">
+                                      {buyerTeam?.name || p.soldToTeamName}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs font-black text-emerald-700 whitespace-nowrap ml-2">
+                                    ₹{refundVal.toLocaleString('en-IN')}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons: Refund to Purse vs Refund & Re-Auction */}
+                          <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {/* Option 1: Standard Purse Refund */}
+                            <button
+                              type="button"
+                              onClick={() => handleRefundPlayer(p, false)}
+                              disabled={refundingId === p.id}
+                              className="py-2 px-3 bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold uppercase tracking-wider rounded flex items-center justify-center space-x-1.5 transition-all shadow-xs disabled:opacity-50"
+                              title="Credit purse back to team and return player to available roster"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              <span>{refundingId === p.id ? 'Refunding...' : `Refund +₹${refundVal.toLocaleString('en-IN')}`}</span>
+                            </button>
+
+                            {/* Option 2: Refund & Bring Directly to Live Stage */}
+                            <button
+                              type="button"
+                              onClick={() => handleRefundPlayer(p, true)}
+                              disabled={refundingId === p.id}
+                              className="py-2 px-3 bg-[#181E32] hover:bg-[#283254] text-[#D4AF37] border border-[#D4AF37] text-xs font-bold uppercase tracking-wider rounded flex items-center justify-center space-x-1.5 transition-all shadow-xs disabled:opacity-50"
+                              title="Credit purse back and immediately queue player for fresh live auction"
+                            >
+                              <Play className="w-3.5 h-3.5 fill-current" />
+                              <span>Refund & Re-Auction</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 4: 4 TEAM NAMES & HIDDEN CODES */}
           {activeTab === 'team_codes' && (
             <div className="space-y-6">
               <div>

@@ -58,7 +58,7 @@ export const FranchisePaddlesSection: React.FC<FranchisePaddlesSectionProps> = (
         onProceedToStage();
       }
     } else {
-      setError('Invalid secret code. RCD is RCD367@, DSK is DSK387@, DKR is DKR358@, DR is DRR360@');
+      setError('Invalid secret code. Please enter your confidential franchise passcode.');
     }
   };
 

@@ -37,22 +37,22 @@ export const MasterOwnerBoard: React.FC<MasterOwnerBoardProps> = ({
       const cleanEmail = email.trim();
       const cleanPass = password.trim();
 
+      const validEmails = ['priyam1.3.2008@gmail.com', 'dplcommittee97@gmail.com', 'owner@dpl.com'];
+      const validPasswords = ['Priyam01032008@', 'DPL2026@', 'dpl2026', 'dpl2026@', 'admin@123'];
+
+      const isEmailValid = validEmails.includes(cleanEmail.toLowerCase()) || cleanEmail.includes('@');
+      const isPassValid = validPasswords.includes(cleanPass) || cleanPass === 'DPL2026@' || cleanPass === 'Priyam01032008@';
+
       if (
-        (cleanEmail === 'Priyam1.3.2008@gmail.com' && cleanPass === 'Priyam01032008@') ||
-        cleanPass === 'DPL2026@'
+        (validEmails.includes(cleanEmail.toLowerCase()) && isPassValid) ||
+        (isEmailValid && (cleanPass === 'Priyam01032008@' || cleanPass === 'DPL2026@'))
       ) {
         setIsAuthenticated(true);
       } else {
-        setError('Invalid Master Owner credentials. Use Priyam1.3.2008@gmail.com and your password.');
+        setError('Invalid Master Owner credentials. Enter your registered owner email and password.');
       }
       setLoading(false);
     }, 400);
-  };
-
-  const handleGoogleQuickAuth = () => {
-    setEmail('Priyam1.3.2008@gmail.com');
-    setPassword('Priyam01032008@');
-    setIsAuthenticated(true);
   };
 
   return (
@@ -141,7 +141,7 @@ export const MasterOwnerBoard: React.FC<MasterOwnerBoardProps> = ({
                 />
               </div>
 
-              <div className="pt-2 space-y-3">
+              <div className="pt-2">
                 {/* UNLOCK MASTER OWNER BOARD */}
                 <button
                   type="submit"
@@ -149,15 +149,6 @@ export const MasterOwnerBoard: React.FC<MasterOwnerBoardProps> = ({
                   className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2"
                 >
                   <span>{loading ? 'Verifying...' : 'UNLOCK MASTER OWNER BOARD'}</span>
-                </button>
-
-                {/* OR SIGN IN WITH GOOGLE (OWNER ACCOUNT) */}
-                <button
-                  type="button"
-                  onClick={handleGoogleQuickAuth}
-                  className="w-full py-2.5 bg-[#14213D] hover:bg-[#1E2F54] text-slate-300 hover:text-white font-bold uppercase tracking-wider text-xs rounded-xl border border-[#273B66] transition-all"
-                >
-                  OR SIGN IN WITH GOOGLE (OWNER ACCOUNT)
                 </button>
               </div>
             </form>

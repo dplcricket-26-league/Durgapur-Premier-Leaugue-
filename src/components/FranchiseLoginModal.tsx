@@ -44,7 +44,7 @@ export const FranchiseLoginModal: React.FC<FranchiseLoginModalProps> = ({
     }
 
     if (!matchedShort) {
-      setError('Invalid hidden code! RCD is RCD367@, DSK is DSK387@, DKR is DKR358@, DR is DRR360@');
+      setError('Invalid franchise hidden code! Please enter your confidential passcode.');
       return;
     }
 
@@ -70,13 +70,6 @@ export const FranchiseLoginModal: React.FC<FranchiseLoginModalProps> = ({
     const val = e.target.value;
     setSelectedFranchiseId(val);
     setError(null);
-    if (val !== 'auto') {
-      const targetTeam = teams.find(t => t.id === val);
-      if (targetTeam && TEAM_SECRET_CODES[targetTeam.shortName]) {
-        // We can pre-fill or hint the code
-        setSecretCode(TEAM_SECRET_CODES[targetTeam.shortName]);
-      }
-    }
   };
 
   return (
@@ -150,70 +143,6 @@ export const FranchiseLoginModal: React.FC<FranchiseLoginModalProps> = ({
                 placeholder="Enter your franchise secret code..."
                 className="w-full px-3.5 py-2.5 bg-[#0F172A] border border-[#334155] rounded-lg text-sm font-mono tracking-wider text-white placeholder-slate-500 focus:outline-none focus:border-[#D4AF37]"
               />
-            </div>
-
-            {/* Quick helper chips */}
-            <div className="pt-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                Official 4 Teams & Secret Passcodes:
-              </span>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const rcd = teams.find(t => t.shortName === 'RCD');
-                    if (rcd) setSelectedFranchiseId(rcd.id);
-                    setSecretCode('RCD367@');
-                    setError(null);
-                  }}
-                  className="p-1.5 px-2 bg-red-950/40 border border-red-800/60 rounded text-left hover:border-red-500 transition-colors"
-                >
-                  <div className="font-bold text-red-300 text-[11px]">RCD</div>
-                  <div className="font-mono text-[10px] text-red-400">RCD367@</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const dsk = teams.find(t => t.shortName === 'DSK');
-                    if (dsk) setSelectedFranchiseId(dsk.id);
-                    setSecretCode('DSK387@');
-                    setError(null);
-                  }}
-                  className="p-1.5 px-2 bg-amber-950/40 border border-amber-800/60 rounded text-left hover:border-amber-500 transition-colors"
-                >
-                  <div className="font-bold text-amber-300 text-[11px]">DSK</div>
-                  <div className="font-mono text-[10px] text-amber-400">DSK387@</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const dkr = teams.find(t => t.shortName === 'DKR');
-                    if (dkr) setSelectedFranchiseId(dkr.id);
-                    setSecretCode('DKR358@');
-                    setError(null);
-                  }}
-                  className="p-1.5 px-2 bg-purple-950/40 border border-purple-800/60 rounded text-left hover:border-purple-500 transition-colors"
-                >
-                  <div className="font-bold text-purple-300 text-[11px]">DKR</div>
-                  <div className="font-mono text-[10px] text-purple-400">DKR358@</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const dr = teams.find(t => t.shortName === 'DR');
-                    if (dr) setSelectedFranchiseId(dr.id);
-                    setSecretCode('DRR360@');
-                    setError(null);
-                  }}
-                  className="p-1.5 px-2 bg-blue-950/40 border border-blue-800/60 rounded text-left hover:border-blue-500 transition-colors"
-                >
-                  <div className="font-bold text-blue-300 text-[11px]">DR</div>
-                  <div className="font-mono text-[10px] text-blue-400">DRR360@</div>
-                </button>
-              </div>
             </div>
 
             {/* Submit Button matching Image 1: LOGIN & LOCK FRANCHISE (GO TO HOME PAGE) */}

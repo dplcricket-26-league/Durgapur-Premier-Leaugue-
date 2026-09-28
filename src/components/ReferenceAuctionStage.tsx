@@ -109,7 +109,7 @@ export const ReferenceAuctionStage: React.FC<ReferenceAuctionStageProps> = ({
         setPasscodeError(`Team ${matchedShortCode} not loaded yet`);
       }
     } else {
-      setPasscodeError('Invalid secret code. Example: RCD is RCD367@, DSK is DSK387@, DKR is DKR358@, DR is DRR360@');
+      setPasscodeError('Invalid secret code. Please enter your confidential franchise passcode.');
     }
   };
 

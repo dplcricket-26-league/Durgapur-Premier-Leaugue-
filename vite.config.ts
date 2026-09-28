@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: '/Durgapur-Premier-Leaugue-/', 
+    base: process.env.GITHUB_ACTIONS ? '/Durgapur-Premier-Leaugue-/' : './', 
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

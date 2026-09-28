@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   setDoc,
   updateDoc,
@@ -302,4 +303,153 @@ export async function resetAuctionSession(): Promise<void> {
     hammerCount: 0,
     history: []
   });
+}
+
+// Recalculate all franchise purses from the true signed roster in Firestore
+export async function recalculateAllTeamPurses(): Promise<void> {
+  try {
+    const [teamsSnap, playersSnap] = await Promise.all([
+      getDocs(collection(db, TEAMS_COL)),
+      getDocs(collection(db, PLAYERS_COL))
+    ]);
+
+    const soldPlayers = playersSnap.docs
+      .map(d => ({ id: d.id, ...d.data() } as Player))
+      .filter(p => p.status === 'sold');
+
+    for (const teamDoc of teamsSnap.docs) {
+      const team = teamDoc.data() as Team;
+      const teamRoster = soldPlayers.filter(
+        p => p.soldToTeamId === teamDoc.id || 
+             (p.soldToTeamName && p.soldToTeamName.toLowerCase() === team.name.toLowerCase()) ||
+             (p.soldToTeamName && p.soldToTeamName.toLowerCase() === team.shortName?.toLowerCase())
+      );
+
+      const totalCap = team.totalPurse || INITIAL_PURSE;
+      const spent = teamRoster.reduce((sum, p) => sum + (p.soldPrice || p.currentBid || 0), 0);
+      const remaining = Math.max(0, totalCap - spent);
+
+      await updateDoc(doc(db, TEAMS_COL, teamDoc.id), {
+        spentPurse: spent,
+        remainingPurse: remaining,
+        playersCount: teamRoster.length
+      });
+    }
+  } catch (err) {
+    console.error('Error recalculating team purses:', err);
+  }
+}
+
+// Refund a sold player: restores the franchise purse back to full ₹60,000 (or minus other signed players)
+// and returns player back to available pool or live stage
+export async function refundPlayer(
+  player: Player,
+  teams: Team[],
+  reAuctionImmediately = false
+): Promise<{ refundedAmount: number; teamName: string; remainingPurse: number }> {
+  const refundAmount = player.soldPrice || player.currentBid || player.basePrice || 0;
+  const buyerTeamId = player.soldToTeamId;
+  const buyerTeamName = player.soldToTeamName;
+
+  // 1. Reset player status back to available pool in Firestore first
+  const newStatus = reAuctionImmediately ? 'live' : 'upcoming';
+  await updateDoc(doc(db, PLAYERS_COL, player.id), {
+    status: newStatus,
+    soldPrice: 0,
+    soldToTeamId: '',
+    soldToTeamName: '',
+    currentBid: player.basePrice || 2000
+  });
+
+  // 2. Fetch fresh teams and players to guarantee exact purse balance in Firestore
+  const [teamsSnap, playersSnap] = await Promise.all([
+    getDocs(collection(db, TEAMS_COL)),
+    getDocs(collection(db, PLAYERS_COL))
+  ]);
+
+  let matchedTeamDocId: string | null = null;
+  let matchedTeamName: string = buyerTeamName || 'Franchise';
+  let matchedTotalCap = INITIAL_PURSE; // 60,000
+
+  for (const tDoc of teamsSnap.docs) {
+    const tData = tDoc.data() as Team;
+    if (
+      tDoc.id === buyerTeamId ||
+      (buyerTeamId && tDoc.id.toLowerCase() === buyerTeamId.toLowerCase()) ||
+      (buyerTeamName && tData.name.toLowerCase() === buyerTeamName.toLowerCase()) ||
+      (buyerTeamName && tData.shortName?.toLowerCase() === buyerTeamName.toLowerCase())
+    ) {
+      matchedTeamDocId = tDoc.id;
+      matchedTeamName = tData.name;
+      matchedTotalCap = tData.totalPurse || INITIAL_PURSE;
+      break;
+    }
+  }
+
+  let finalRemainingPurse = matchedTotalCap;
+
+  if (matchedTeamDocId) {
+    // Calculate remaining sold players for this team (excluding this refunded player)
+    const otherSoldPlayers = playersSnap.docs
+      .map(d => ({ id: d.id, ...d.data() } as Player))
+      .filter(p => {
+        if (p.id === player.id) return false;
+        if (p.status !== 'sold') return false;
+        return (
+          p.soldToTeamId === matchedTeamDocId ||
+          (p.soldToTeamName && p.soldToTeamName.toLowerCase() === matchedTeamName.toLowerCase())
+        );
+      });
+
+    const newSpent = otherSoldPlayers.reduce((sum, p) => sum + (p.soldPrice || p.currentBid || 0), 0);
+    finalRemainingPurse = Math.max(0, matchedTotalCap - newSpent);
+    const newCount = otherSoldPlayers.length;
+
+    await updateDoc(doc(db, TEAMS_COL, matchedTeamDocId), {
+      spentPurse: newSpent,
+      remainingPurse: finalRemainingPurse,
+      playersCount: newCount
+    });
+  } else {
+    // If not matched directly, recalculate all teams to ensure no drift
+    await recalculateAllTeamPurses();
+  }
+
+  // 3. Update auction state
+  const auctionRef = doc(db, 'system', AUCTION_DOC);
+  if (reAuctionImmediately) {
+    await updateDoc(auctionRef, {
+      activePlayerId: player.id,
+      status: 'bidding',
+      currentBid: player.basePrice || 2000,
+      currentBidTeamId: null,
+      currentBidTeamName: null,
+      hammerCount: 0,
+      lastBidTime: Date.now()
+    });
+  } else {
+    try {
+      const auctionSnap = await getDoc(auctionRef);
+      if (auctionSnap.exists()) {
+        const data = auctionSnap.data();
+        if (data.activePlayerId === player.id) {
+          await updateDoc(auctionRef, {
+            status: 'idle',
+            currentBid: player.basePrice || 2000,
+            currentBidTeamId: null,
+            currentBidTeamName: null,
+            hammerCount: 0
+          });
+        }
+      }
+    } catch {
+      // Ignore if document not found
+    }
+  }
+
+  return { 
+    refundedAmount: refundAmount, 
+    teamName: matchedTeamName,
+    remainingPurse: finalRemainingPurse 
+  };
 }

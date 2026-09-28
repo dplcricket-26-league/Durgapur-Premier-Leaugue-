@@ -2,5 +2,7 @@
   "name": "DPL AUCTION 2026",
   "description": "Live Premier League Cricket Auction Platform for DPL 2026 with Team Purse Management, Real-time Bidding Hammer, Live Player Board, and Owner Panel.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
